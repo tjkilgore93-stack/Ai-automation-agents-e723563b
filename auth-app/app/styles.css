@@ -1,0 +1,17 @@
+* { box-sizing: border-box; }
+:root { color-scheme: light; }
+body { margin: 0; background: #f5f7fb; color: #182230; font-family: Arial, Helvetica, sans-serif; }
+main { width: min(100% - 2rem, 720px); margin: 4rem auto; }
+.panel { background: white; border: 1px solid #e1e7ef; border-radius: 16px; padding: 2rem; box-shadow: 0 12px 35px rgba(24,34,48,.06); }
+h1 { margin-top: 0; font-size: clamp(1.7rem, 5vw, 2.2rem); }
+p { line-height: 1.6; color: #475467; }
+form { display: grid; gap: 1rem; }
+label { display: grid; gap: .4rem; font-weight: 600; }
+input { width: 100%; padding: .8rem .9rem; border: 1px solid #cbd5e1; border-radius: 8px; font: inherit; }
+button, .button { display: inline-block; border: 0; border-radius: 8px; padding: .85rem 1rem; background: #175cd3; color: white; font: inherit; font-weight: 700; cursor: pointer; text-decoration: none; }
+button:hover, .button:hover { background: #1849a9; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; margin-top: 1rem; }
+.notice { padding: .8rem 1rem; border-radius: 8px; background: #eef4ff; color: #1849a9; overflow-wrap: anywhere; }
+.error { background: #fff1f0; color: #b42318; }
+small { color: #667085; }
+a { color: #175cd3; }

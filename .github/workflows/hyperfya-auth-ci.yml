@@ -1,0 +1,28 @@
+name: Hyperfya Auth CI
+on:
+  push:
+    paths:
+      - 'auth-app/**'
+      - '.github/workflows/hyperfya-auth-ci.yml'
+  pull_request:
+    paths:
+      - 'auth-app/**'
+      - '.github/workflows/hyperfya-auth-ci.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: auth-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run typecheck
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://yxrspvibmnfgnytijedd.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_build_placeholder
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
