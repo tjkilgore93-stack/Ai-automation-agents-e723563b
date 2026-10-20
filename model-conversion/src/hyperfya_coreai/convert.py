@@ -130,8 +130,8 @@ def main() -> None:
         description="Export/decompose a PyTorch model and convert it to Core AI AIProgram."
     )
     parser.add_argument("--model-module", required=True, help="Importable Python module with build_model() and example_inputs().")
-    parser.add_argument("--input-names", nargs="*", default=[], help="Names for non-state inputs in forward() order.")
-    parser.add_argument("--output-names", nargs="*", default=[], help="Names for returned non-state outputs in tuple order.")
+    parser.add_argument("--input-names", nargs="*", required=True, help="Names for non-state inputs in forward() order.")
+    parser.add_argument("--output-names", nargs="*", required=True, help="Names for returned non-state outputs in tuple order.")
     parser.add_argument("--state-names", nargs="*", default=[], help="Names for mutable state in exported graph order.")
     parser.add_argument("--entrypoint-name", default="main")
     args = parser.parse_args()
