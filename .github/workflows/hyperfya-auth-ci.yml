@@ -8,9 +8,19 @@ on:
     paths:
       - 'auth-app/**'
       - '.github/workflows/hyperfya-auth-ci.yml'
+
+# This workflow builds and tests only; it does not deploy or need write access.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: auth-app
@@ -19,9 +29,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
-      - run: npm run typecheck
-      - run: npm run build
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Type-check
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://yxrspvibmnfgnytijedd.supabase.co
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_build_placeholder
