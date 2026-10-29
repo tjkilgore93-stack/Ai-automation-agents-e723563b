@@ -6,12 +6,22 @@ on:
   pull_request:
     branches: [ "main" ]
 
+# CI only needs to read source; never grant repository write access by default.
+permissions:
+  contents: read
+
+# Stop superseded CI runs for the same branch/PR to save runner time.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     strategy:
+      fail-fast: false
       matrix:
         node-version: [20.x, 22.x, 24.x]
 
