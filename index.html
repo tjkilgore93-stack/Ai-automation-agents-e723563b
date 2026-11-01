@@ -3,46 +3,132 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI Agent Automation Bootcamp</title>
+  <meta name="theme-color" content="#090806">
+  <meta name="description" content="Hyperfy is the AI Business OS for building, automating, and scaling your business from one connected platform.">
+  <title>hyperfy — AI Business OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <main>
-    <section class="hero">
-      <p class="eyebrow">AI AGENT AUTOMATION BOOTCAMP</p>
-      <h1>Turn repetitive creator work into a reliable AI-agent workflow.</h1>
-      <p class="lede">A practical course for consumers and creators who want one useful automation they can understand, test, and improve.</p>
-      <a class="button" href="#checkout">Build your workflow</a>
-      <p class="fine-print">Self-paced lessons, templates, and implementation guidance. No income guarantees.</p>
-    </section>
-    <section class="grid">
-      <article><h2>Map</h2><p>Find one repeatable task worth automating.</p></article>
-      <article><h2>Build</h2><p>Design triggers, context, actions, verification, and human approval.</p></article>
-      <article><h2>Launch</h2><p>Test with safe data and ship a workflow with a fallback.</p></article>
-    </section>
-    <section class="card">
-      <h2>Get the free automation scorecard</h2>
-      <p>Identify your best first workflow before you buy anything.</p>
-      <form id="lead-form">
-        <input type="email" name="email" placeholder="you@example.com" required>
-        <label><input type="checkbox" name="consent" required> Email me the scorecard and practical course updates.</label>
-        <button class="button" type="submit">Send my scorecard</button>
-        <p id="lead-status" role="status"></p>
-      </form>
-    </section>
-    <section id="checkout" class="card accent">
-      <p class="eyebrow">CORE PROGRAM</p>
-      <h2>AI Agent Automation Bootcamp</h2>
-      <p>Build one reliable automation from idea to tested first run.</p>
-      <ul><li>Workflow opportunity scorecard</li><li>Implementation templates</li><li>Reliability and privacy checklist</li><li>Activation guidance</li></ul>
-      <p class="price">$297 one-time</p>
-      <form id="checkout-form">
-        <input type="email" name="email" placeholder="Email for course access" required>
-        <button class="button" type="submit">Continue to secure checkout</button>
-        <p id="checkout-status" role="status"></p>
-      </form>
-    </section>
-  </main>
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="hyperfy home">
+        <span class="brand-mark" aria-hidden="true"><span>H</span><i></i></span>
+        <span>hyperfy</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#platform">Platform</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#scorecard">Free scorecard</a>
+      </nav>
+      <a class="nav-cta" href="#scorecard">Get started <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-dot"></span> THE AI BUSINESS OPERATING SYSTEM</p>
+          <h1>Your business.<br><span>On autopilot.</span></h1>
+          <p class="hero-lede">Meet hyperfy — one connected system to build, run, and scale your business with AI agents, intelligent workflows, and automation that keeps work moving.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#platform">Explore hyperfy <span aria-hidden="true">→</span></a>
+            <a class="button button-quiet" href="#scorecard">Get the free scorecard</a>
+          </div>
+          <div class="hero-proof"><span class="proof-icon">✦</span><span>Build once. Automate the busywork. Focus on growth.</span></div>
+        </div>
+
+        <div class="product-stage" aria-label="Illustration of the hyperfy business dashboard">
+          <div class="stage-glow"></div>
+          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+          <div class="dashboard">
+            <div class="dash-sidebar">
+              <div class="dash-brand"><span class="mini-mark">H</span><span>hyperfy</span></div>
+              <div class="side-item active"><span>▦</span> Overview</div>
+              <div class="side-item"><span>◇</span> AI Agents</div>
+              <div class="side-item"><span>⌘</span> Workflows</div>
+              <div class="side-item"><span>▤</span> Library</div>
+              <div class="side-item"><span>⌁</span> Analytics</div>
+              <div class="side-bottom"><span class="status-pulse"></span> All systems online</div>
+            </div>
+            <div class="dash-main">
+              <div class="dash-top"><span>Business overview</span><span class="dash-date">LIVE WORKSPACE&nbsp; ◉</span></div>
+              <div class="welcome-row"><div><small>YOUR COMMAND CENTER</small><h3>Good things are in motion.</h3></div><span class="avatar">H</span></div>
+              <div class="metric-grid">
+                <div class="metric"><small>ACTIVE AGENTS</small><strong>08</strong><span class="metric-note">Ready to work</span></div>
+                <div class="metric"><small>WORKFLOWS</small><strong>24</strong><span class="metric-note">Running smoothly</span></div>
+                <div class="metric"><small>TIME RECLAIMED</small><strong>32<span>h</span></strong><span class="metric-note">This month</span></div>
+              </div>
+              <div class="activity-card">
+                <div class="activity-head"><strong>Automation activity</strong><span>LAST 7 DAYS</span></div>
+                <div class="chart" aria-hidden="true"><i style="height:30%"></i><i style="height:48%"></i><i style="height:39%"></i><i style="height:67%"></i><i style="height:54%"></i><i style="height:82%"></i><i style="height:100%"></i><i style="height:76%"></i><i style="height:92%"></i><i style="height:68%"></i><i style="height:86%"></i><i style="height:100%"></i></div>
+                <div class="chart-labels"><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span></div>
+              </div>
+              <div class="agent-row"><span class="agent-symbol">✧</span><div><strong>Synthbot is on the job</strong><small>Maintenance workflow completed</small></div><span class="completed">COMPLETE</span></div>
+            </div>
+          </div>
+          <div class="floating-chip chip-top"><span class="chip-spark">✦</span><span><b>AI agents active</b><small>Working across your business</small></span></div>
+          <div class="floating-chip chip-bottom"><span class="chip-check">✓</span><span><b>Workflow completed</b><small>Another task handled</small></span></div>
+          <div class="stage-caption">ONE PLATFORM <span>·</span> ENDLESS MOMENTUM</div>
+        </div>
+      </section>
+
+      <section class="trust-strip" aria-label="Hyperfy platform principles">
+        <div><span class="strip-icon">▣</span><span><b>Build once.</b><small>Set up the systems</small></span></div>
+        <div><span class="strip-icon infinity">∞</span><span><b>One platform.</b><small>Everything connected</small></span></div>
+        <div><span class="strip-icon">↗</span><span><b>Scale faster.</b><small>Let AI handle the repeatable</small></span></div>
+      </section>
+
+      <section class="platform-section" id="platform">
+        <div class="section-heading">
+          <p class="eyebrow">YOUR BUSINESS, CONNECTED</p>
+          <h2>Everything works<br><span>better together.</span></h2>
+          <p>Stop stitching together disconnected tools. Hyperfy brings the moving parts of your business into one intelligent operating system.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card feature-large"><span class="feature-icon">✧</span><p class="feature-kicker">01 / AI AGENTS</p><h3>Specialized agents.<br>Real work, handled.</h3><p>Put purpose-built AI agents to work on customer conversations, operations, and the tasks that keep your business moving.</p><span class="feature-arrow">↗</span></article>
+          <article class="feature-card"><span class="feature-icon">⌁</span><p class="feature-kicker">02 / FUNNELS & WEBSITES</p><h3>Turn attention<br>into action.</h3><p>Create focused digital experiences that turn visitors into leads and customers.</p><span class="feature-arrow">↗</span></article>
+          <article class="feature-card"><span class="feature-icon">$</span><p class="feature-kicker">03 / MONETIZATION</p><h3>Make every step<br>count.</h3><p>Connect products, payments, subscriptions, and revenue workflows.</p><span class="feature-arrow">↗</span></article>
+          <article class="feature-card"><span class="feature-icon">ϟ</span><p class="feature-kicker">04 / AUTOMATION</p><h3>Keep the work<br>in motion.</h3><p>Automate follow-ups, handoffs, and repeatable business operations with workflows you control.</p><span class="feature-arrow">↗</span></article>
+          <article class="feature-card feature-wide"><div><p class="feature-kicker">05 / ONE CONNECTED WORKSPACE</p><h3>From first touch to follow-through.</h3><p>Bring your tools, information, and business processes together so every part of the operation has context.</p></div><div class="connected-nodes" aria-hidden="true"><span>LEADS</span><i>→</i><span>AGENTS</span><i>→</i><span>WORKFLOWS</span><i>→</i><span>GROWTH</span></div></article>
+        </div>
+      </section>
+
+      <section class="how-section" id="how-it-works">
+        <div class="section-heading centered">
+          <p class="eyebrow">LESS BUSYWORK. MORE BUILDING.</p>
+          <h2>Make your next move<br><span>your smartest one.</span></h2>
+        </div>
+        <div class="steps">
+          <article><span>01</span><h3>Connect</h3><p>Bring your business goals and essential tools into focus.</p></article>
+          <article><span>02</span><h3>Automate</h3><p>Put AI agents and workflows on the repeatable work.</p></article>
+          <article><span>03</span><h3>Grow</h3><p>See what is working, improve your systems, and scale with intention.</p></article>
+        </div>
+      </section>
+
+      <section class="scorecard-section" id="scorecard">
+        <div class="scorecard-copy"><p class="eyebrow">START WITH ONE SMART MOVE</p><h2>Find the work<br>AI can take off<br><span>your plate.</span></h2><p>Get the free automation scorecard and identify a practical first workflow for your business.</p><div class="scorecard-points"><span>✓ Find repeatable tasks</span><span>✓ Spot your best automation opportunity</span><span>✓ Get a clear next step</span></div></div>
+        <div class="form-card"><div class="form-card-mark">✦</div><h3>Get your free scorecard</h3><p>Enter your email and we'll send it straight to your inbox.</p>
+          <form id="lead-form">
+            <label class="visually-hidden" for="lead-email">Email address</label>
+            <input id="lead-email" type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+            <label class="consent"><input type="checkbox" name="consent" required><span>Email me the scorecard and practical Hyperfy updates.</span></label>
+            <button class="button button-primary form-button" type="submit">Send my scorecard <span aria-hidden="true">→</span></button>
+            <p id="lead-status" class="form-status" role="status" aria-live="polite"></p>
+          </form>
+          <small class="privacy-note">No pressure. Unsubscribe whenever you like.</small>
+        </div>
+      </section>
+
+      <section class="program-section" id="checkout">
+        <div><p class="eyebrow">READY TO BUILD?</p><h2>Start with a workflow<br><span>you can put to work.</span></h2><p>The AI Agent Automation Bootcamp is the existing paid program: practical lessons and templates to build and test one useful automation.</p></div>
+        <div class="program-card"><div class="program-top"><span>FOUNDATION PROGRAM</span><span class="program-dot"></span></div><h3>AI Agent Automation Bootcamp</h3><ul><li>Workflow opportunity scorecard</li><li>Implementation templates</li><li>Reliability and privacy checklist</li><li>Activation guidance</li></ul><div class="program-price">$297 <small>one-time</small></div><form id="checkout-form"><label class="visually-hidden" for="checkout-email">Email for course access</label><input id="checkout-email" type="email" name="email" placeholder="Email for course access" autocomplete="email" required><button class="button button-primary form-button" type="submit">Continue to secure checkout <span aria-hidden="true">→</span></button><p id="checkout-status" class="form-status" role="status" aria-live="polite"></p></form></div>
+      </section>
+    </main>
+
+    <footer class="footer"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"><span>H</span><i></i></span><span>hyperfy</span></a><p>The future of business begins now.</p><span>© <span id="year">2026</span> hyperfy. All rights reserved.</span></footer>
+  </div>
   <script src="/app.js"></script>
 </body>
 </html>
