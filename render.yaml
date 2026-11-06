@@ -21,6 +21,8 @@ services:
         sync: false
       - key: STRIPE_PRICE_ID
         sync: false
+      - key: STRIPE_SUBSCRIPTION_PRICE_ID
+        sync: false
       - key: RESEND_API_KEY
         sync: false
       - key: FROM_EMAIL

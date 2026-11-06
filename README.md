@@ -20,7 +20,8 @@ Copy `.env.example` to `.env` and set the values you need:
 - `PORT` — optional HTTP port; defaults to `3000`
 - `BASE_URL` — optional public base URL; defaults to `http://localhost:<PORT>`
 - `COURSE_ACCESS_SECRET` — required for stable course and unsubscribe tokens outside local development
-- `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` — required for live Stripe checkout and webhook verification
+- `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` — required for live one-time Bootcamp checkout and webhook verification
+- `STRIPE_SUBSCRIPTION_PRICE_ID` — required for the separate recurring Hyperfya service checkout; create a recurring Price in Stripe and set its Price ID here
 - `RESEND_API_KEY`, `FROM_EMAIL` — required to send lead and course-access emails
 
 Never commit `.env` or production credentials. Use the deployment platform’s secret store for deployed environments.
@@ -34,8 +35,10 @@ npm test
 
 ## Current behavior
 
-- When Stripe is configured, `/api/checkout` creates a Stripe Checkout session.
-- Without Stripe configuration, `/api/checkout` returns a demo success URL rather than calling Stripe.
+- `/api/checkout` remains the one-time Bootcamp purchase flow and uses `STRIPE_PRICE_ID`.
+- `/api/subscription/checkout` creates a recurring Stripe Checkout session using `STRIPE_SUBSCRIPTION_PRICE_ID`; it fails closed with HTTP 503 until configured and never returns a demo payment URL.
+- Configure the Stripe webhook endpoint at `/api/stripe/webhook` for `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, and `invoice.payment_failed`.
+- Subscription records are currently written to the root funnel's JSON store on its configured persistent disk. This is a first billing-integration step, not yet a Supabase user-entitlement system or a multi-instance billing database.
 - When Resend is not configured, lead capture and order handling continue, but email delivery is skipped.
 
 ## GitHub Actions
