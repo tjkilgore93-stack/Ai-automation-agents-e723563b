@@ -17,6 +17,25 @@ document.querySelector('#lead-form').addEventListener('submit', async (event) =>
   } catch (error) { status.textContent = error.message; }
 });
 
+document.querySelector('#managed-growth-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const form = new FormData(event.currentTarget);
+  const status = document.querySelector('#managed-growth-status');
+  const button = event.currentTarget.querySelector('button[type="submit"]');
+  status.textContent = 'Preparing secure monthly checkout...';
+  button.disabled = true;
+  try {
+    const result = await post('/api/subscription/checkout', { email: form.get('email') });
+    if (typeof result.url !== 'string' || !result.url.startsWith('https://')) {
+      throw new Error('A secure checkout link could not be created.');
+    }
+    window.location.href = result.url;
+  } catch (error) {
+    status.textContent = error.message;
+    button.disabled = false;
+  }
+});
+
 document.querySelector('#checkout-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   const form = new FormData(event.currentTarget);
