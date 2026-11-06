@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { before, after } from 'node:test';
 import { once } from 'node:events';
 import { createHmac } from 'node:crypto';
-import { accessToken, server } from './server.js';
+import { accessToken, server, upsertSubscription } from './server.js';
 
 let origin;
 
@@ -27,6 +27,31 @@ async function request(path, options) {
 test('access tokens are deterministic and email-normalized', () => {
   assert.equal(accessToken('USER@example.com'), accessToken('user@example.com'));
   assert.notEqual(accessToken('one@example.com'), accessToken('two@example.com'));
+});
+
+
+test('subscription snapshots are inserted and updated without duplicating subscription IDs', () => {
+  const store = { subscriptions: [] };
+  upsertSubscription(store, {
+    id: 'sub_test_123',
+    customer: 'cus_test_123',
+    status: 'active',
+    current_period_end: 1_800_000_000,
+    cancel_at_period_end: false,
+    items: { data: [{ price: { id: 'price_monthly_test' } }] }
+  });
+  upsertSubscription(store, {
+    id: 'sub_test_123',
+    customer: 'cus_test_123',
+    status: 'canceled',
+    current_period_end: 1_800_000_000,
+    cancel_at_period_end: true,
+    items: { data: [{ price: { id: 'price_monthly_test' } }] }
+  });
+  assert.equal(store.subscriptions.length, 1);
+  assert.equal(store.subscriptions[0].status, 'canceled');
+  assert.equal(store.subscriptions[0].priceId, 'price_monthly_test');
+  assert.equal(store.subscriptions[0].cancelAtPeriodEnd, true);
 });
 
 test('malformed JSON returns a controlled 400 response', async () => {
