@@ -148,6 +148,9 @@ test('subscription checkout creates a Stripe subscription session using its own 
   process.env.STRIPE_SECRET_KEY = 'sk_test_subscription';
   process.env.STRIPE_SUBSCRIPTION_PRICE_ID = 'price_recurring_test';
   globalThis.fetch = async (url, options) => {
+    if (String(url) !== 'https://api.stripe.com/v1/checkout/sessions') {
+      return originalFetch(url, options);
+    }
     captured = { url, options, params: new URLSearchParams(options.body) };
     return new Response(JSON.stringify({ id: 'cs_test_subscription', url: 'https://checkout.stripe.com/c/pay/cs_test_subscription' }), {
       status: 200,
