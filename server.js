@@ -313,6 +313,14 @@ async function handleWebhook(request, response) {
       if (existing) {
         existing.latestInvoiceStatus = event.type === 'invoice.paid' ? 'paid' : 'payment_failed';
         existing.updatedAt = new Date().toISOString();
+      } else {
+        store.subscriptions.push({
+          subscriptionId,
+          customerId: typeof object.customer === 'string' ? object.customer : null,
+          status: 'pending_subscription_event',
+          latestInvoiceStatus: event.type === 'invoice.paid' ? 'paid' : 'payment_failed',
+          updatedAt: new Date().toISOString()
+        });
       }
     }
   }
@@ -401,4 +409,4 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   server.listen(port, () => console.log(`Funnel running at ${baseUrl}`));
 }
 
-export { server, accessToken, verifyStripeSignature };
+export { server, accessToken, verifyStripeSignature, upsertSubscription };
