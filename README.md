@@ -37,7 +37,8 @@ npm test
 
 - `/api/checkout` remains the one-time Bootcamp purchase flow and uses `STRIPE_PRICE_ID`.
 - `/api/subscription/checkout` creates a recurring Stripe Checkout session using `STRIPE_SUBSCRIPTION_PRICE_ID`; it fails closed with HTTP 503 until configured and never returns a demo payment URL.
-- The Stripe webhook records subscription lifecycle and invoice payment-status events separately from Bootcamp orders.
+- Configure the Stripe webhook endpoint at `/api/stripe/webhook` for `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, and `invoice.payment_failed`.
+- Subscription records are currently written to the root funnel's JSON store on its configured persistent disk. This is a first billing-integration step, not yet a Supabase user-entitlement system or a multi-instance billing database.
 - When Resend is not configured, lead capture and order handling continue, but email delivery is skipped.
 
 ## GitHub Actions
