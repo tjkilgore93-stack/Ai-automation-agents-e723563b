@@ -211,6 +211,15 @@ test('homepage serves the HVAC sales funnel and retains both form hooks', async 
   assert.match(html, /Turn missed calls into/);
   assert.match(html, /id="lead-form"/);
   assert.match(html, /id="checkout-form"/);
+  assert.match(html, /Managed Growth/);
+  assert.match(html, /\$499/);
+  assert.match(html, /id="managed-growth-form"/);
+
+  const appResponse = await fetch(new URL('/app.js', origin));
+  const appScript = await appResponse.text();
+  assert.equal(appResponse.status, 200);
+  assert.match(appScript, /managed-growth-form/);
+  assert.match(appScript, /\/api\/subscription\/checkout/);
 });
 
 test('path traversal attempts are rejected', async () => {
