@@ -1,0 +1,25 @@
+name: Core AI conversion scaffold CI
+on:
+  push:
+    paths:
+      - 'model-conversion/**'
+      - '.github/workflows/coreai-conversion-ci.yml'
+  pull_request:
+    paths:
+      - 'model-conversion/**'
+      - '.github/workflows/coreai-conversion-ci.yml'
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: model-conversion
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run dependency-free unit tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -v

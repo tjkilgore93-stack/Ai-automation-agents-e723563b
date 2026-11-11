@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hyperfya-coreai-conversion"
+version = "0.1.0"
+description = "Isolated PyTorch to Core AI conversion pipeline for Hyperfya"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+converter = [
+  "torch",
+  "coreai-torch",
+]
+
+[project.scripts]
+hyperfya-coreai-convert = "hyperfya_coreai.convert:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

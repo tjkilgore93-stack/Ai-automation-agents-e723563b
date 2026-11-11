@@ -25,10 +25,15 @@ class HttpError extends Error {
 
 async function loadStore() {
   try {
-    return JSON.parse(await readFile(dataFile, 'utf8'));
+    const store = JSON.parse(await readFile(dataFile, 'utf8'));
+    store.leads ||= [];
+    store.orders ||= [];
+    store.subscriptions ||= [];
+    store.processedWebhookEvents ||= [];
+    return store;
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
-    const store = { leads: [], orders: [] };
+    const store = { leads: [], orders: [], subscriptions: [], processedWebhookEvents: [] };
     await saveStore(store);
     return store;
   }
@@ -45,10 +50,21 @@ function json(response, status, body) {
 }
 
 async function readRawBody(request) {
-  let raw = '';
-  for await (const chunk of request) raw += chunk;
-  if (raw.length > 100_000) throw new HttpError(413, 'Request body is too large.');
-  return raw;
+  const chunks = [];
+  let byteLength = 0;
+  let tooLarge = false;
+  for await (const chunk of request) {
+    byteLength += chunk.length;
+    if (tooLarge) continue;
+    if (byteLength > 100_000) {
+      tooLarge = true;
+      chunks.length = 0;
+      continue;
+    }
+    chunks.push(chunk);
+  }
+  if (tooLarge) throw new HttpError(413, 'Request body is too large.');
+  return Buffer.concat(chunks).toString('utf8');
 }
 
 function parseJson(raw) {
@@ -78,6 +94,10 @@ function envReady() {
   return Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_PRICE_ID);
 }
 
+function subscriptionEnvReady() {
+  return Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SUBSCRIPTION_PRICE_ID);
+}
+
 function isEmail(email) {
   return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
 }
@@ -103,6 +123,54 @@ async function createCheckoutSession(email) {
   });
   if (!result.ok) throw new Error(`Stripe checkout failed: ${result.status}`);
   return result.json();
+}
+
+async function createSubscriptionCheckoutSession(email) {
+  if (!subscriptionEnvReady()) throw new HttpError(503, 'Recurring checkout is not configured yet.');
+  const params = new URLSearchParams({
+    mode: 'subscription',
+    'line_items[0][price]': process.env.STRIPE_SUBSCRIPTION_PRICE_ID,
+    'line_items[0][quantity]': '1',
+    customer_email: email,
+    success_url: `${baseUrl}/?subscription=success&session_id={CHECKOUT_SESSION_ID}#plans`,
+    cancel_url: `${baseUrl}/#plans`,
+    'metadata[product]': 'Hyperfya Managed AI Automation',
+    'subscription_data[metadata][product]': 'Hyperfya Managed AI Automation'
+  });
+  const result = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: params
+  });
+  if (!result.ok) throw new Error(`Stripe subscription checkout failed: ${result.status}`);
+  const session = await result.json();
+  if (typeof session.url !== 'string' || !session.url.startsWith('https://')) {
+    throw new Error('Stripe did not return a valid checkout URL.');
+  }
+  return session;
+}
+
+function upsertSubscription(store, subscription, extra = {}) {
+  if (!subscription || typeof subscription.id !== 'string') return;
+  const existing = store.subscriptions.find((item) => item.subscriptionId === subscription.id) || {};
+  const price = subscription.items?.data?.[0]?.price;
+  const record = {
+    ...existing,
+    subscriptionId: subscription.id,
+    customerId: typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id || existing.customerId || null,
+    status: subscription.status || existing.status || 'unknown',
+    priceId: price?.id || existing.priceId || null,
+    currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000).toISOString() : existing.currentPeriodEnd || null,
+    cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end),
+    updatedAt: new Date().toISOString(),
+    ...extra
+  };
+  const index = store.subscriptions.findIndex((item) => item.subscriptionId === subscription.id);
+  if (index >= 0) store.subscriptions[index] = record;
+  else store.subscriptions.push(record);
 }
 
 function verifyStripeSignature(raw, signature) {
@@ -185,27 +253,85 @@ async function handleCheckout(request, response) {
   return json(response, 200, { url: session.url });
 }
 
+async function handleSubscriptionCheckout(request, response) {
+  const input = await body(request);
+  const email = String(input.email || '').trim().toLowerCase();
+  if (!isEmail(email)) return json(response, 400, { error: 'Enter a valid email address.' });
+  const session = await createSubscriptionCheckoutSession(email);
+  return json(response, 200, { url: session.url });
+}
+
 async function handleWebhook(request, response) {
   const raw = await readRawBody(request);
   const signature = request.headers['stripe-signature'];
   if (!verifyStripeSignature(raw, signature)) return json(response, 400, { error: 'Invalid webhook signature.' });
   const event = parseJson(raw);
+  if (!event || typeof event.type !== 'string' || !event.data?.object) {
+    throw new HttpError(400, 'Invalid Stripe event payload.');
+  }
+  const store = await loadStore();
+  if (typeof event.id === 'string' && store.processedWebhookEvents.includes(event.id)) {
+    return json(response, 200, { received: true, duplicate: true });
+  }
+
+  const object = event.data.object;
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    const email = String(session.customer_details?.email || session.customer_email || '').trim().toLowerCase();
-    if (isEmail(email)) {
-      const store = await loadStore();
-      if (!store.orders.some((order) => order.sessionId === session.id)) {
-        const token = accessToken(email);
-        store.orders.push({ sessionId: session.id, email, paidAt: new Date().toISOString(), product: product.name });
-        await saveStore(store);
-        await sendCourseEmail(email, token);
+    const email = String(object.customer_details?.email || object.customer_email || '').trim().toLowerCase();
+    if (object.mode === 'subscription' && typeof object.subscription === 'string') {
+      const existing = store.subscriptions.find((item) => item.subscriptionId === object.subscription) || {};
+      const record = {
+        ...existing,
+        subscriptionId: object.subscription,
+        customerId: typeof object.customer === 'string' ? object.customer : existing.customerId || null,
+        email: isEmail(email) ? email : existing.email || null,
+        checkoutSessionId: object.id,
+        checkoutCompletedAt: new Date().toISOString(),
+        status: existing.status && existing.status !== 'checkout_pending' ? existing.status : 'checkout_completed',
+        updatedAt: new Date().toISOString()
+      };
+      const index = store.subscriptions.findIndex((item) => item.subscriptionId === object.subscription);
+      if (index >= 0) store.subscriptions[index] = record;
+      else store.subscriptions.push(record);
+    } else if (isEmail(email) && !store.orders.some((order) => order.sessionId === object.id)) {
+      store.orders.push({ sessionId: object.id, email, paidAt: new Date().toISOString(), product: product.name });
+      await saveStore(store);
+      await sendCourseEmail(email, accessToken(email));
+    }
+  } else if (event.type === 'customer.subscription.created' ||
+             event.type === 'customer.subscription.updated' ||
+             event.type === 'customer.subscription.deleted') {
+    const subscription = object;
+    upsertSubscription(store, subscription, {
+      email: store.subscriptions.find((item) => item.subscriptionId === subscription.id)?.email || null
+    });
+  } else if (event.type === 'invoice.paid' || event.type === 'invoice.payment_failed') {
+    const subscriptionId = typeof object.subscription === 'string'
+      ? object.subscription
+      : object.parent?.subscription_details?.subscription;
+    if (typeof subscriptionId === 'string') {
+      const existing = store.subscriptions.find((item) => item.subscriptionId === subscriptionId);
+      if (existing) {
+        existing.latestInvoiceStatus = event.type === 'invoice.paid' ? 'paid' : 'payment_failed';
+        existing.updatedAt = new Date().toISOString();
+      } else {
+        store.subscriptions.push({
+          subscriptionId,
+          customerId: typeof object.customer === 'string' ? object.customer : null,
+          status: 'pending_subscription_event',
+          latestInvoiceStatus: event.type === 'invoice.paid' ? 'paid' : 'payment_failed',
+          updatedAt: new Date().toISOString()
+        });
       }
     }
   }
+
+  if (typeof event.id === 'string') {
+    store.processedWebhookEvents.push(event.id);
+    if (store.processedWebhookEvents.length > 1000) store.processedWebhookEvents.splice(0, store.processedWebhookEvents.length - 1000);
+  }
+  await saveStore(store);
   return json(response, 200, { received: true });
 }
-
 async function handleCourseAccess(url, response) {
   const email = String(url.searchParams.get('email') || '').trim().toLowerCase();
   const token = String(url.searchParams.get('token') || '');
@@ -265,8 +391,9 @@ const server = createServer(async (request, response) => {
     const url = new URL(request.url, baseUrl);
     if (request.method === 'POST' && url.pathname === '/api/leads') return await handleLead(request, response);
     if (request.method === 'POST' && url.pathname === '/api/checkout') return await handleCheckout(request, response);
+    if (request.method === 'POST' && url.pathname === '/api/subscription/checkout') return await handleSubscriptionCheckout(request, response);
     if (request.method === 'POST' && url.pathname === '/api/stripe/webhook') return await handleWebhook(request, response);
-    if (request.method === 'GET' && url.pathname === '/api/health') return json(response, 200, { ok: true, paymentsConfigured: envReady(), emailConfigured: Boolean(process.env.RESEND_API_KEY && process.env.FROM_EMAIL) });
+    if (request.method === 'GET' && url.pathname === '/api/health') return json(response, 200, { ok: true, paymentsConfigured: envReady(), subscriptionsConfigured: subscriptionEnvReady(), emailConfigured: Boolean(process.env.RESEND_API_KEY && process.env.FROM_EMAIL) });
     if (request.method === 'GET' && url.pathname === '/api/course-access') return await handleCourseAccess(url, response);
     if (request.method === 'GET' && url.pathname === '/api/unsubscribe') return await handleUnsubscribe(url, response);
     if (request.method === 'GET') return await staticFile(url.pathname, response);
@@ -282,4 +409,4 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   server.listen(port, () => console.log(`Funnel running at ${baseUrl}`));
 }
 
-export { server, accessToken, verifyStripeSignature };
+export { server, accessToken, verifyStripeSignature, upsertSubscription };

@@ -1,4 +1,4 @@
-# ai-agent-automation-funnel
+# AI Agent Automation Funnel
 
 Self-hosted Node.js funnel for the AI Agent Automation Bootcamp.
 
@@ -17,37 +17,39 @@ npm install
 
 Copy `.env.example` to `.env` and set the values you need:
 
-- `PORT` - optional HTTP port, defaults to `3000`
-- `BASE_URL` - optional public base URL, defaults to `http://localhost:<PORT>`
-- `COURSE_ACCESS_SECRET` - required for stable course and unsubscribe tokens outside local development
-- `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` - required for live Stripe checkout and webhook verification
-- `RESEND_API_KEY`, `FROM_EMAIL` - required to send lead and course-access emails
+- `PORT` — optional HTTP port; defaults to `3000`
+- `BASE_URL` — optional public base URL; defaults to `http://localhost:<PORT>`
+- `COURSE_ACCESS_SECRET` — required for stable course and unsubscribe tokens outside local development
+- `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` — required for live one-time Bootcamp checkout and webhook verification
+- `STRIPE_SUBSCRIPTION_PRICE_ID` — required for the separate recurring Hyperfya service checkout; create a recurring Price in Stripe and set its Price ID here
+- `RESEND_API_KEY`, `FROM_EMAIL` — required to send lead and course-access emails
 
-## Run
+Never commit `.env` or production credentials. Use the deployment platform’s secret store for deployed environments.
 
-Start the server:
+## Run and test
 
 ```bash
 npm start
-```
-
-Run the test suite:
-
-```bash
 npm test
 ```
 
 ## Current behavior
 
-- When Stripe is configured, `/api/checkout` creates a Stripe Checkout session.
-- When Stripe is not configured, `/api/checkout` returns a demo success URL instead of calling Stripe.
-- When Resend is not configured, lead capture and order handling still work, but email sending is skipped.
+- `/api/checkout` remains the one-time Bootcamp purchase flow and uses `STRIPE_PRICE_ID`.
+- `/api/subscription/checkout` creates a recurring Stripe Checkout session using `STRIPE_SUBSCRIPTION_PRICE_ID`; it fails closed with HTTP 503 until configured and never returns a demo payment URL.
+- Configure the Stripe webhook endpoint at `/api/stripe/webhook` for `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, and `invoice.payment_failed`.
+- Subscription records are currently written to the root funnel's JSON store on its configured persistent disk. This is a first billing-integration step, not yet a Supabase user-entitlement system or a multi-instance billing database.
+- When Resend is not configured, lead capture and order handling continue, but email delivery is skipped.
 
 ## GitHub Actions
 
-- `Node.js CI` installs dependencies and runs the Node test suite on supported Node versions.
-- The release workflow keeps the verification steps, but only attempts `npm publish` when the package is not marked `private` in `package.json`. Private repositories therefore test successfully on release without trying to publish to npm.
+- Node.js CI installs dependencies and runs the Node test suite on supported Node versions.
+- The release workflow runs verification and attempts `npm publish` only when the package is not marked `private`. Private repositories therefore verify successfully without publishing to npm.
+
+## Hyperfy product architecture (planned)
+
+The repository also contains a Hyperfy landing page and a Supabase/Next.js auth app. A single repository with separate apps is the current proposed direction, but the migration is **not complete**. See [the engineering handbook](docs/ENGINEERING_HANDBOOK.md), [the multi-app migration plan](docs/MULTI_APP_MIGRATION.md), and [SKILLS.md](SKILLS.md) for current state, conventions, and staged steps. The existing root Node.js funnel remains in place during the migration; do not replace its root scripts or deployment configuration as part of the app move.
 
 ## License
 
-This project is licensed under the MIT License. See `LICENSE`.
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
