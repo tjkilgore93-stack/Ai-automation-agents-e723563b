@@ -133,6 +133,29 @@ test('valid webhook signatures still return a controlled 400 response for malfor
   }
 });
 
+test('versioned API health endpoint returns stable service metadata', async () => {
+  const { response, data } = await request('/api/v1/health');
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get('content-type') || '', /^application\/json/);
+  assert.deepEqual(data, {
+    ok: true,
+    service: 'hyperfya-api',
+    apiVersion: 'v1'
+  });
+});
+
+test('unknown versioned API routes return JSON 404 instead of static files', async () => {
+  const { response, data } = await request('/api/v1/unknown');
+  assert.equal(response.status, 404);
+  assert.deepEqual(data, { error: 'Not found.', code: 'NOT_FOUND' });
+});
+
+test('versioned API health endpoint rejects unsupported methods', async () => {
+  const { response, data } = await request('/api/v1/health', { method: 'POST' });
+  assert.equal(response.status, 405);
+  assert.deepEqual(data, { error: 'Method not allowed.' });
+});
+
 test('repository-root static file fallback still serves existing assets', async () => {
   const response = await fetch(new URL('/styles.css', origin));
   const text = await response.text();
