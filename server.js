@@ -389,6 +389,13 @@ async function staticFile(pathname, response) {
 const server = createServer(async (request, response) => {
   try {
     const url = new URL(request.url, baseUrl);
+    if (url.pathname === '/api/v1/health') {
+      if (request.method !== 'GET') return json(response, 405, { error: 'Method not allowed.' });
+      return json(response, 200, { ok: true, service: 'hyperfya-api', apiVersion: 'v1' });
+    }
+    if (url.pathname === '/api/v1' || url.pathname.startsWith('/api/v1/')) {
+      return json(response, 404, { error: 'Not found.', code: 'NOT_FOUND' });
+    }
     if (request.method === 'POST' && url.pathname === '/api/leads') return await handleLead(request, response);
     if (request.method === 'POST' && url.pathname === '/api/checkout') return await handleCheckout(request, response);
     if (request.method === 'POST' && url.pathname === '/api/subscription/checkout') return await handleSubscriptionCheckout(request, response);
