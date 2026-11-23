@@ -3,6 +3,7 @@ import { createServer } from 'node:http';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { extname, isAbsolute, join, normalize, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHvacHandler } from './hvac/index.js';
 
 const root = join(fileURLToPath(new URL('.', import.meta.url)), '.');
 const publicDir = join(root, 'public');
@@ -15,6 +16,17 @@ const product = {
   price: '$297',
   description: 'Build and launch one reliable AI-agent workflow for your creator business.'
 };
+
+
+const hvacHandler = createHvacHandler({
+  enabled: process.env.HVAC_DEMO_ENABLED === 'true',
+  tenantId: process.env.HVAC_DEMO_ENABLED === 'true'
+    ? (process.env.HVAC_TENANT_ID || 'hyperfya-demo')
+    : 'hyperfya-demo',
+  staffToken: process.env.HVAC_STAFF_TOKEN,
+  approverToken: process.env.HVAC_APPROVER_TOKEN,
+  tokenTtlMs: Number(process.env.HVAC_TOKEN_TTL_SECONDS || 28800) * 1000
+});
 
 class HttpError extends Error {
   constructor(status, message) {
@@ -389,6 +401,9 @@ async function staticFile(pathname, response) {
 const server = createServer(async (request, response) => {
   try {
     const url = new URL(request.url, baseUrl);
+    if (url.pathname === '/api/v1/hvac' || url.pathname.startsWith('/api/v1/hvac/')) {
+      return await hvacHandler.handle(request, response, url);
+    }
     if (url.pathname === '/api/v1/health') {
       if (request.method !== 'GET') return json(response, 405, { error: 'Method not allowed.' });
       return json(response, 200, { ok: true, service: 'hyperfya-api', apiVersion: 'v1' });
