@@ -462,7 +462,7 @@ body { background:radial-gradient(ellipse at 76% 12%,rgba(76,100,139,.16),transp
 .hf-plan ul { min-height:155px; padding-left:18px; color:#c0c2c7; font-size:.78rem; line-height:2; }
 .hf-plan a { display:inline-flex; gap:10px; color:var(--hf-bright); text-decoration:none; font-size:.78rem; font-weight:700; }
 .hf-plan a:hover { text-decoration:underline; }
-.hf-plan-price { margin:8px 0 14px; color:var(--hf-bright); font:600 1.8rem "Space Grotesk",sans-serif; }
+g.hf-plan-price { margin:8px 0 14px; color:var(--hf-bright); font:600 1.8rem "Space Grotesk",sans-serif; }
 .hf-plan-price span { color:#9da3ad; font:400 .72rem "DM Sans",sans-serif; }
 .hf-managed-form { display:grid; gap:10px; margin-top:18px; }
 .hf-managed-form input[type=email] { width:100%; padding:12px; border:1px solid rgba(217,173,100,.24); border-radius:6px; background:#090d13; color:#fff; font:inherit; font-size:.78rem; }
