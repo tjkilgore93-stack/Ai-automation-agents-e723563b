@@ -18,6 +18,11 @@ test('root server routes the enabled HVAC demo before the generic versioned API 
     await once(server, 'close');
   });
   const origin = 'http://127.0.0.1:' + server.address().port;
+  const pageResponse = await fetch(origin + '/hvac/demo.html');
+  const pageHtml = await pageResponse.text();
+  assert.equal(pageResponse.status, 200);
+  assert.match(pageHtml, /FICTIONAL DATA ONLY/);
+
   const noticeResponse = await fetch(origin + '/api/v1/hvac/demo');
   const notice = await noticeResponse.json();
   assert.equal(noticeResponse.status, 200);
