@@ -31,6 +31,20 @@ async function start(handler) {
 function full(overrides = {}) { return { name: 'Jordan Example', email: 'jordan@example.test', zip: '37397', message: 'The air conditioner is not cooling the house.', ...overrides }; }
 function handler(options = {}) { return createHvacHandler({ enabled: true, tenantId: 'tenant-a', staffToken: STAFF, approverToken: APPROVER, ...options }); }
 
+test('HVAC demo is disabled by default and refuses incomplete enabled configuration', async (t) => {
+  const app = await start(createHvacHandler());
+  t.after(() => app.close());
+  assert.equal((await app.request(API + '/demo')).response.status, 404);
+  assert.throws(() => createHvacHandler({ enabled: true, tenantId: 'tenant-a' }), /staff and approver tokens/i);
+});
+
+test('in-memory inquiry storage has a hard record cap', () => {
+  const store = createMemoryStore({ maxInquiries: 1 });
+  const service = createHvacService({ tenantId: 'tenant-a', store });
+  service.createInquiry(full());
+  assert.throws(() => service.createInquiry(full({ email: 'second@example.test' })), /record limit/i);
+});
+
 test('classification and urgency rules cover HVAC categories and safety indicators', () => {
   assert.equal(classifyServiceType('AC is not cooling'), 'no_cooling');
   assert.equal(classifyServiceType('The heater is not working'), 'no_heat');
