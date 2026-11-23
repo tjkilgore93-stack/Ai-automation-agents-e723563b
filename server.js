@@ -431,4 +431,4 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   server.listen(port, () => console.log(`Funnel running at ${baseUrl}`));
 }
 
-export { server, accessToken, verifyStripeSignature, upsertSubscription };
+export { server, hvacHandler, accessToken, verifyStripeSignature, upsertSubscription };
