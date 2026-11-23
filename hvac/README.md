@@ -22,7 +22,7 @@ Run npm start and open /hvac/demo.html on the same local origin. The page keeps 
 - Deterministic classification; urgent indicators take precedence over missing information. Urgent inquiries receive no draft and cannot be approved as ordinary drafts.
 - Fixed initial response template. Staff edits create a new draft version; any prior approval is invalidated.
 - Staff can read/update. The separate approver credential can approve/reject, record urgent handling, and close eligible inquiries.
-- Tokens are SHA-256 hashed in memory, expire, and can be revoked while the process is running. Restarting clears revocations; rotate configured credentials before restarting if revocation must persist.
+- Tokens are SHA-256 hashed in memory and expire. Trusted in-process code can revoke a credential through the exported server.hvacHandler.revokeCredential(token) hook; there is no public revocation endpoint. Restarting clears revocations, so rotate configured credentials before restarting if revocation must persist.
 - Audit events are append-only through this application interface, bounded, and linked by an in-memory SHA-256 chain. This is not database-enforced protection and does not protect against a process owner or memory modification.
 - No database, hosted service, dependency, production deployment, or persistent customer data is used.
 
