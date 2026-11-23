@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test server.test.js test/streamConverter.test.js"
+    "test": "node --test server.test.js test/streamConverter.test.js test/hvac.test.js test/hvac-server.test.js"
   },
   "engines": {
     "node": ">=20"
